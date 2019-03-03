@@ -22,14 +22,14 @@ class Nugat(object):
 
 class Knapsack(object):
     def __init__(self):
-        self.pile_of_things = []
+        self.__list_o = []
+
+    @property
+    def list_o(self):
+        return self.__list_o
 
     def put_in_knapsack(self, new_thing):
-        self.pile_of_things.append(new_thing)
+        self.__list_o.append(new_thing)
 
     def __str__(self):
         return 'Knapsack!? what did u expect?'
-
-
-if __name__ == '__main__':
-    pass
