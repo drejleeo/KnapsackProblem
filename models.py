@@ -43,7 +43,7 @@ class Knapsack(object):
 
 
 class Solution(object):
-    def __init__(self, binary_solution, weight, quality):
+    def __init__(self, binary_solution, weight, quality, sack):
         self.__binary_solution = binary_solution
         self.__weight = weight
         self.__quality = quality
@@ -59,3 +59,7 @@ class Solution(object):
     @property
     def binary_solution(self):
         return self.__binary_solution
+
+    @property
+    def sol_len(self):
+        return len(self.__binary_solution)

@@ -1,10 +1,18 @@
 from models import Nugat, Knapsack
 import xlsxwriter
-from xlsxwriter.utility import xl_rowcol_to_cell
 import os
 from datetime import datetime
+from random import randint
 
 base_path = os.getcwd()
+
+
+def generate_binary_solution(nr_of_objects):
+    superior_limit = 2 ** nr_of_objects
+    random_solution = randint(0, superior_limit)
+    binary = '{0:b}'.format(random_solution)
+    binary_solution = (nr_of_objects - len(binary)) * '0' + binary
+    return binary_solution
 
 
 def load_data(file_path):

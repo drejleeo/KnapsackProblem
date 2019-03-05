@@ -1,16 +1,14 @@
-from utils import load_data, base_path, output_excel
+from utils import generate_binary_solution, load_data, base_path,\
+    output_excel
 import sys
 from models import Solution
-from random import randint
 
 
 def run(nr_of_objects, default_sack, weight_limit,  given_runtimes):
 
     solutions = []
     while given_runtimes:
-        random_solution = randint(0, 2**nr_of_objects)
-        binary = '{0:b}'.format(random_solution)
-        binary_solution = (default_sack.nr_of_objects - len(binary)) * '0' + binary
+        binary_solution = generate_binary_solution(nr_of_objects)
         weight = 0
         quality = 0
 
@@ -24,7 +22,7 @@ def run(nr_of_objects, default_sack, weight_limit,  given_runtimes):
             solutions.append(
                 Solution(binary_solution, weight, quality)
             )
-            print(binary_solution, weight, quality)
+            print(weight, quality)
 
     return solutions
 
