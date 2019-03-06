@@ -43,10 +43,15 @@ class Knapsack(object):
 
 
 class Solution(object):
-    def __init__(self, binary_solution, weight, quality, sack):
+    def __init__(self, binary_solution, default_sack):
         self.__binary_solution = binary_solution
-        self.__weight = weight
-        self.__quality = quality
+        self.__default_sack = default_sack
+        self.__weight = 0
+        self.__quality = 0
+        for obj_index in range(default_sack.nr_of_objects):
+            if binary_solution[obj_index] == '1':
+                self.__weight += default_sack.list_of_objects[obj_index].weight
+                self.__quality += default_sack.list_of_objects[obj_index].value
 
     @property
     def weight(self):
@@ -59,6 +64,10 @@ class Solution(object):
     @property
     def binary_solution(self):
         return self.__binary_solution
+
+    @property
+    def default_sack(self):
+        return self.__default_sack
 
     @property
     def sol_len(self):

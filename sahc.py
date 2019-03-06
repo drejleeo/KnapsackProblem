@@ -12,10 +12,19 @@ from models import Nugat, Knapsack, Solution
 import sys
 
 
-def sahc(total_objects, given_runtimes):
+def sahc(total_objects, default_sack, given_runtimes):
     for run in range(given_runtimes):
         sol = generate_binary_solution(total_objects)
-        neighbourhood = [flip_bit(sol, bit) for bit in range(total_objects)]
+        neighbourhood = [
+            Solution(
+                binary_solution=flip_bit(sol, bit),
+                default_sack=default_sack
+            ) for bit in range(total_objects)
+        ]
+
+
+
+
 
 
 def flip_bit(bin_nr, bit):

@@ -20,7 +20,7 @@ def run(nr_of_objects, default_sack, weight_limit,  given_runtimes):
         if weight <= weight_limit:
             given_runtimes -= 1
             solutions.append(
-                Solution(binary_solution, weight, quality)
+                Solution(binary_solution, default_sack)
             )
             print(weight, quality)
 
