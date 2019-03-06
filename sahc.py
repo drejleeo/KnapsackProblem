@@ -8,17 +8,20 @@
     5.Dupa un numar maxim de evaluari, se returneaza cel mai bun c(hilltop).
 '''
 from utils import load_data, base_path, generate_binary_solution
-from models import Nugat, Knapsack, Solution
+from models import Object, Knapsack, Solutions, RandomCombinationData
 import sys
 
 
 def sahc(total_objects, default_sack, given_runtimes):
     for run in range(given_runtimes):
-        sol = generate_binary_solution(total_objects)
+        bin_sol = generate_binary_solution(total_objects)
         neighbourhood = [
-            Solution(
-                binary_solution=flip_bit(sol, bit),
-                default_sack=default_sack
+            Solutions.if_verifies_then_add(
+                possible_sol=
+                    RandomCombinationData(
+                        binary_solution=flip_bit(bin_sol, bit),
+                        sack=default_sack,
+                    )
             ) for bit in range(total_objects)
         ]
 
@@ -37,4 +40,4 @@ def flip_bit(bin_nr, bit):
 
 if __name__ == '__main__':
     given_runtimes, file_rel = int(sys.argv[1]), sys.argv[2]
-    total_objects, default_sack, limit = load_data(file_path='/'.join((base_path, file_rel)))
+    total_objects, initial_sack, limit = load_data(file_path='/'.join((base_path, file_rel)))

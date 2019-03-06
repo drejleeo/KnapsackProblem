@@ -1,29 +1,19 @@
 from utils import generate_binary_solution, load_data, base_path,\
     output_excel
 import sys
-from models import Solution
+from models import Solutions, RandomCombinationData
 
 
 def run(nr_of_objects, default_sack, weight_limit,  given_runtimes):
 
-    solutions = []
+    solutions = Solutions(max_weight=weight_limit)
     while given_runtimes:
-        binary_solution = generate_binary_solution(nr_of_objects)
-        weight = 0
-        quality = 0
-
-        for obj_index in range(default_sack.nr_of_objects):
-            if binary_solution[obj_index] == '1':
-                weight += default_sack.list_of_objects[obj_index].weight
-                quality += default_sack.list_of_objects[obj_index].value
-
-        if weight <= weight_limit:
-            given_runtimes -= 1
-            solutions.append(
-                Solution(binary_solution, default_sack)
-            )
-            print(weight, quality)
-
+        bin_sol = generate_binary_solution(nr_of_objects)
+        combination_data = RandomCombinationData(
+            binary_solution=bin_sol,
+            sack=default_sack,
+        )
+        solutions.if_verifies_then_add(combination_data)
     return solutions
 
 

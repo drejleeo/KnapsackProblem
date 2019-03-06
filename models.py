@@ -4,7 +4,7 @@ Author: Leonte Andrei
 """
 
 
-class Nugat(object):
+class Object(object):
     def __init__(self, value, weight):
         self.__value = value
         self.__weight = weight
@@ -23,52 +23,52 @@ class Nugat(object):
 
 class Knapsack(object):
     def __init__(self):
-        self.__list_of_objects = []
-        self.__nr_of_objects = 0
+        self.__list = []
 
     @property
-    def list_of_objects(self):
-        return self.__list_of_objects
+    def list(self):
+        return self.__list
 
-    @property
-    def nr_of_objects(self):
-        return self.__nr_of_objects
-
-    def put_in_sack(self, new_thing):
-        self.__list_of_objects.append(new_thing)
-        self.__nr_of_objects += 1
-
-    def __str__(self):
-        return 'sack with {} objects'.format(self.nr_of_objects)
+    def add_object(self, object):
+        self.__list.append(object)
 
 
-class Solution(object):
-    def __init__(self, binary_solution, default_sack):
-        self.__binary_solution = binary_solution
-        self.__default_sack = default_sack
-        self.__weight = 0
+class RandomCombinationData(object):
+    def __init__(self, binary_solution, sack):
+        self.__binary = binary_solution
+        self.__total_weight = 0
         self.__quality = 0
-        for obj_index in range(default_sack.nr_of_objects):
-            if binary_solution[obj_index] == '1':
-                self.__weight += default_sack.list_of_objects[obj_index].weight
-                self.__quality += default_sack.list_of_objects[obj_index].value
+
+        for index in range(sack.nr_of_objects):
+            self.__total_weight += sack.list[index].weight * int(self.__binary[index])
+            self.__quality += sack.list[index].value * int(self.__binary[index])
 
     @property
-    def weight(self):
-        return self.__weight
+    def binary(self):
+        return self.__binary
 
     @property
+    def total_weight(self):
+        return self.__total_weight
+
     def quality(self):
         return self.__quality
 
-    @property
-    def binary_solution(self):
-        return self.__binary_solution
+    def __str__(self):
+        return 'Random combination with combinatoric binary: {}'.format(self.binary)
 
-    @property
-    def default_sack(self):
-        return self.__default_sack
 
-    @property
-    def sol_len(self):
-        return len(self.__binary_solution)
+class Solutions(object):
+    def __init__(self, max_weight):
+        self.__list = []
+        self.__max_weight = max_weight
+
+    @classmethod
+    def if_verifies_then_add(cls, possible_sol):
+        inst = cls(cls.__max_weight)
+        if possible_sol.weight <= cls.__max_weight:
+            cls.__list.append(possible_sol)
+        return inst
+
+    def add(self, obj):
+        self.__list.append(obj)

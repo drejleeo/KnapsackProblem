@@ -1,4 +1,4 @@
-from models import Nugat, Knapsack
+from models import Object, Knapsack
 import xlsxwriter
 import os
 from datetime import datetime
@@ -23,7 +23,7 @@ def load_data(file_path):
         for index in range(total_number):
 
             parsed = list(map(int, file.readline().split()))
-            obj = Nugat(value=parsed[1], weight=parsed[2])
+            obj = Object(value=parsed[1], weight=parsed[2])
 
             sack.put_in_sack(obj)
 
