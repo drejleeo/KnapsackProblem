@@ -21,27 +21,33 @@ class Object(object):
         return 'Object with value {} and weight {}'.format(self.value, self.weight)
 
 
-class Knapsack(object):
-    def __init__(self):
-        self.__list = []
+class HypothesisBag(object):
+    def __init__(self, list, max_weight):
+        self.__list = list
+        self.__max_weight = max_weight
 
     @property
     def list(self):
         return self.__list
 
+    @property
+    def max_weight(self):
+        return self.__max_weight
+
     def add_object(self, object):
         self.__list.append(object)
 
 
-class RandomCombinationData(object):
-    def __init__(self, binary_solution, sack):
+class Knapsack(HypothesisBag):
+    def __init__(self, binary_solution, hypothesis_bag, max_weight):
+        super(Knapsack, self).__init__(list, max_weight)
         self.__binary = binary_solution
+
         self.__total_weight = 0
         self.__quality = 0
-
-        for index in range(sack.nr_of_objects):
-            self.__total_weight += sack.list[index].weight * int(self.__binary[index])
-            self.__quality += sack.list[index].value * int(self.__binary[index])
+        for index in range(len(hypothesis_bag.list)):
+            self.__total_weight += hypothesis_bag.list[index].weight * int(self.__binary[index])
+            self.__quality += hypothesis_bag.list[index].value * int(self.__binary[index])
 
     @property
     def binary(self):
@@ -51,24 +57,16 @@ class RandomCombinationData(object):
     def total_weight(self):
         return self.__total_weight
 
+    @property
     def quality(self):
         return self.__quality
 
+    @property
+    def is_valid(self):
+        if self.total_weight <= self.max_weight:
+            return True
+        else:
+            return False
+
     def __str__(self):
         return 'Random combination with combinatoric binary: {}'.format(self.binary)
-
-
-class Solutions(object):
-    def __init__(self, max_weight):
-        self.__list = []
-        self.__max_weight = max_weight
-
-    @classmethod
-    def if_verifies_then_add(cls, possible_sol):
-        inst = cls(cls.__max_weight)
-        if possible_sol.weight <= cls.__max_weight:
-            cls.__list.append(possible_sol)
-        return inst
-
-    def add(self, obj):
-        self.__list.append(obj)

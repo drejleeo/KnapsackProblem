@@ -8,7 +8,7 @@ def run(nr_of_objects, default_sack, weight_limit,  given_runtimes):
 
     solutions = Solutions(max_weight=weight_limit)
     while given_runtimes:
-        bin_sol = generate_binary_solution(nr_of_objects)
+        bin_sol = generate_binary_solution(len(default_sack.list))
         combination_data = RandomCombinationData(
             binary_solution=bin_sol,
             sack=default_sack,

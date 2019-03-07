@@ -7,27 +7,43 @@
     Altfel, se trece la pasul 2 cu noul c.
     5.Dupa un numar maxim de evaluari, se returneaza cel mai bun c(hilltop).
 '''
-from utils import load_data, base_path, generate_binary_solution
-from models import Object, Knapsack, Solutions, RandomCombinationData
+from utils import load_data_to_instance, base_path, generate_binary_solution
+from models import Object, HypothesisBag, Knapsack
 import sys
 
 
-def sahc(total_objects, default_sack, given_runtimes):
-    for run in range(given_runtimes):
-        bin_sol = generate_binary_solution(total_objects)
-        neighbourhood = [
-            Solutions.if_verifies_then_add(
-                possible_sol=
-                    RandomCombinationData(
-                        binary_solution=flip_bit(bin_sol, bit),
-                        sack=default_sack,
-                    )
-            ) for bit in range(total_objects)
-        ]
+def sahc(current_hilltop, searching_area):
+
+    neighbourhood = get_neighbours(current_hilltop)
+    best = find_best_neighbour(neighbourhood, searching_area)
+    if best > current_hilltop:
+        sahc(best, searching_area)
+    else:
+        return current_hilltop
 
 
+def get_neighbours(current_hill_top):
+    neighbourhood = [
+        flip_bit(current_hill_top, bit_index) for bit_index in range(len(bin_sol))
+    ]
+    neighbourhood.insert(0, current_hill_top)
+    return neighbourhood
 
 
+def find_best_neighbour(neighbourhood, searching_area):
+    processed_neighbourhood = process_neighbours(neighbourhood, searching_area)
+    return max(neighbour.quality for neighbour in processed_neighbourhood)
+
+
+def process_neighbours(neighbourhood, searching_area):
+    processed = [
+        Knapsack(
+            binary_solution=neighbour,
+            hypothesis_bag=searching_area,
+            max_weight=max_weight,
+        ) for neighbour in neighbourhood
+    ]
+    return processed
 
 
 def flip_bit(bin_nr, bit):
@@ -40,4 +56,16 @@ def flip_bit(bin_nr, bit):
 
 if __name__ == '__main__':
     given_runtimes, file_rel = int(sys.argv[1]), sys.argv[2]
-    total_objects, initial_sack, limit = load_data(file_path='/'.join((base_path, file_rel)))
+    solutions = []
+    all_objects, max_weight = load_data_to_instance(file_path='/'.join((base_path, file_rel)))
+    hypothesis_bag = HypothesisBag(all_objects, max_weight)
+
+    for run in range(given_runtimes):
+        bin_sol = generate_binary_solution(len(hypothesis_bag.list))
+        sol = sahc(
+            current_hilltop=bin_sol,
+            searching_area=hypothesis_bag,
+        )
+        solutions.append(sol)
+    for sol in solutions:
+        print(sol)

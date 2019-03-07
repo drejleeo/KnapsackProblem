@@ -1,4 +1,4 @@
-from models import Object, Knapsack
+from models import Object, HypothesisBag
 import xlsxwriter
 import os
 from datetime import datetime
@@ -15,21 +15,22 @@ def generate_binary_solution(nr_of_objects):
     return binary_solution
 
 
-def load_data(file_path):
-    sack = Knapsack()
+def load_data_to_instance(file_path):
 
     with open(file_path, 'r') as file:
         total_number = int(file.readline())
+
+        objects_list = []
         for index in range(total_number):
 
             parsed = list(map(int, file.readline().split()))
             obj = Object(value=parsed[1], weight=parsed[2])
 
-            sack.put_in_sack(obj)
+            objects_list.append(obj)
 
         weight_limit = int(file.readline())
 
-    return total_number, sack, weight_limit
+    return objects_list, weight_limit
 
 
 def output_excel(nr_of_objects, default_sack, given_runtimes, solutions):
