@@ -14,25 +14,47 @@ import sys
 
 def sahc(current_hilltop, searching_area):
 
-    neighbourhood = get_neighbours(current_hilltop)
-    best = find_best_neighbour(neighbourhood, searching_area)
+    neighbours = get_neighbours(current_hilltop)
+    best = find_best_neighbour(neighbours, searching_area)
     if best > current_hilltop:
         sahc(best, searching_area)
     else:
         return current_hilltop
 
 
-def get_neighbours(current_hill_top):
-    neighbourhood = [
-        flip_bit(current_hill_top, bit_index) for bit_index in range(len(bin_sol))
+def get_neighbours(current_hilltop):
+    return [
+        flip_bit(current_hilltop, bit_index) for bit_index in range(len(bin_sol))
     ]
-    neighbourhood.insert(0, current_hill_top)
-    return neighbourhood
 
 
-def find_best_neighbour(neighbourhood, searching_area):
-    processed_neighbourhood = process_neighbours(neighbourhood, searching_area)
-    return max(neighbour.quality for neighbour in processed_neighbourhood)
+def find_best_neighbour(neighbours, searching_area):
+    # processed_neighbours = process_neighbours(neighbours, searching_area)
+    # return max(neighbour.quality for neighbour in processed_neighbours)
+    quality = 0
+    for full_intel in generate_neighbours_valid_intel(neighbours, searching_area):
+        neighbour, intel = full_intel
+        if intel[1] > quality:
+            quality = intel[1]
+            best = neighbour
+    return best
+
+
+def generate_neighbours_valid_intel(neighbours, searching_area):
+    for neighbour in neighbours:
+        intel = neighbour_intel(binary_solution=neighbour, searching_area=searching_area)
+        if intel:
+            yield neighbour, intel
+
+
+def neighbour_intel(binary_solution, searching_area):
+    weight, quality = 0, 0
+    for bit_index in range(len(searching_area)):
+        weight += searching_area.list[bit_index].weight * int(binary_solution[bit_index])
+        quality += searching_area.list[bit_index].value * int(binary_solution[bit_index])
+        if weight > searching_area.max_weight:
+            return None
+    return weight, quality
 
 
 def process_neighbours(neighbourhood, searching_area):
@@ -46,11 +68,11 @@ def process_neighbours(neighbourhood, searching_area):
     return processed
 
 
-def flip_bit(bin_nr, bit):
-    if bin_nr[bit] == '0':
-        bin_nr = '{}1{}'.format(bin_nr[:bit], bin_nr[bit+1:])
-    elif bin_nr[bit] == '1':
-        bin_nr = '{}0{}'.format(bin_nr[:bit], bin_nr[bit+1:])
+def flip_bit(bin_nr, bit_index):
+    if bin_nr[bit_index] == '0':
+        bin_nr = '{}1{}'.format(bin_nr[:bit_index], bin_nr[bit_index+1:])
+    elif bin_nr[bit_index] == '1':
+        bin_nr = '{}0{}'.format(bin_nr[:bit_index], bin_nr[bit_index+1:])
     return bin_nr
 
 
