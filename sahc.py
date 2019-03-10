@@ -8,64 +8,33 @@
     5.Dupa un numar maxim de evaluari, se returneaza cel mai bun c(hilltop).
 '''
 from utils import load_data_to_instance, base_path, generate_binary_solution
-from models import Object, HypothesisBag, Knapsack
+from models import Object, HypothesisBag
 import sys
 
 
 def sahc(current_hilltop, searching_area):
 
-    neighbours = get_neighbours(current_hilltop)
-    best = find_best_neighbour(neighbours, searching_area)
-    if best > current_hilltop:
+    neighbourhood = get_neighbourhood(current_hilltop)
+    best = find_best_neighbour(neighbourhood, searching_area)
+
+    print('{} <-- current hilltop: qw: {}'.format(current_hilltop, neighbour_intel(current_hilltop, searching_area)))
+    for n in neighbourhood:
+        print('{} with{}'.format(n, neighbour_intel(n, searching_area)))
+    print('\n\n\n')
+    print('\n\n Quality {} \n\n'.format(neighbour_intel(best, searching_area)['quality']))
+
+    if best != current_hilltop:
         sahc(best, searching_area)
     else:
         return current_hilltop
 
 
-def get_neighbours(current_hilltop):
-    return [
+def get_neighbourhood(current_hilltop):
+    neighbourhood = [
         flip_bit(current_hilltop, bit_index) for bit_index in range(len(bin_sol))
     ]
-
-
-def find_best_neighbour(neighbours, searching_area):
-    # processed_neighbours = process_neighbours(neighbours, searching_area)
-    # return max(neighbour.quality for neighbour in processed_neighbours)
-    quality = 0
-    for full_intel in generate_neighbours_valid_intel(neighbours, searching_area):
-        neighbour, intel = full_intel
-        if intel[1] > quality:
-            quality = intel[1]
-            best = neighbour
-    return best
-
-
-def generate_neighbours_valid_intel(neighbours, searching_area):
-    for neighbour in neighbours:
-        intel = neighbour_intel(binary_solution=neighbour, searching_area=searching_area)
-        if intel:
-            yield neighbour, intel
-
-
-def neighbour_intel(binary_solution, searching_area):
-    weight, quality = 0, 0
-    for bit_index in range(len(searching_area)):
-        weight += searching_area.list[bit_index].weight * int(binary_solution[bit_index])
-        quality += searching_area.list[bit_index].value * int(binary_solution[bit_index])
-        if weight > searching_area.max_weight:
-            return None
-    return weight, quality
-
-
-def process_neighbours(neighbourhood, searching_area):
-    processed = [
-        Knapsack(
-            binary_solution=neighbour,
-            hypothesis_bag=searching_area,
-            max_weight=max_weight,
-        ) for neighbour in neighbourhood
-    ]
-    return processed
+    neighbourhood.insert(0, current_hilltop)
+    return neighbourhood
 
 
 def flip_bit(bin_nr, bit_index):
@@ -76,6 +45,35 @@ def flip_bit(bin_nr, bit_index):
     return bin_nr
 
 
+def find_best_neighbour(neighbourhood, searching_area):
+    best = neighbourhood[0]
+    quality = neighbour_intel(best, searching_area)['weight']
+    for full_intel in generate_valid_neighbours_intel(neighbourhood, searching_area):
+        neighbour, intel = full_intel
+        if intel['quality'] > quality:
+            quality = intel['quality']
+            best = neighbour
+    return best
+
+
+def generate_valid_neighbours_intel(neighbours, searching_area):
+    for neighbour in neighbours:
+        intel = neighbour_intel(binary_solution=neighbour, searching_area=searching_area)
+        if intel['weight'] <= searching_area.max_weight:
+            yield neighbour, intel
+
+
+def neighbour_intel(binary_solution, searching_area):
+    weight, quality = 0, 0
+    for bit_index in range(len(searching_area.list)):
+        weight += searching_area.list[bit_index].weight * int(binary_solution[bit_index])
+        quality += searching_area.list[bit_index].value * int(binary_solution[bit_index])
+    return {
+        'weight': weight,
+        'quality': quality,
+    }
+
+
 if __name__ == '__main__':
     given_runtimes, file_rel = int(sys.argv[1]), sys.argv[2]
     solutions = []
@@ -83,11 +81,13 @@ if __name__ == '__main__':
     hypothesis_bag = HypothesisBag(all_objects, max_weight)
 
     for run in range(given_runtimes):
+        print('\n\nRun {}:\n\n'.format(run))
         bin_sol = generate_binary_solution(len(hypothesis_bag.list))
         sol = sahc(
             current_hilltop=bin_sol,
             searching_area=hypothesis_bag,
         )
         solutions.append(sol)
+        print('\n\n\n\n')
     for sol in solutions:
         print(sol)
