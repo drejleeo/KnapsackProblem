@@ -16,8 +16,20 @@ def sahc(current_hilltop, searching_area):
 
     neighbours = get_neighbours(current_hilltop)
     best = find_best_neighbour(neighbours, searching_area)
-    if best > current_hilltop:
-        sahc(best, searching_area)
+    current_quality = neighbour_intel(current_hilltop, searching_area)['quality']
+
+    # print('{} <-- current hilltop with {}'.format(current_hilltop, current_quality))
+    # for nei in neighbours:
+    #     print('{} with intel: {}'.format(nei, neighbour_intel(nei, searching_area)))
+    # print('\n')
+    # print(best)
+
+    best_quality = neighbour_intel(best, searching_area)['quality']
+    # print('COMPARE best: {}      WITH     current: {}'.format(best_quality, current_quality))
+    # print('\n\n')
+
+    if best and neighbour_intel(best, searching_area)['quality'] > current_quality:
+        return sahc(best, searching_area)
     else:
         return current_hilltop
 
@@ -29,13 +41,12 @@ def get_neighbours(current_hilltop):
 
 
 def find_best_neighbour(neighbours, searching_area):
-    # processed_neighbours = process_neighbours(neighbours, searching_area)
-    # return max(neighbour.quality for neighbour in processed_neighbours)
     quality = 0
+    best = 0
     for full_intel in generate_neighbours_valid_intel(neighbours, searching_area):
         neighbour, intel = full_intel
-        if intel[1] > quality:
-            quality = intel[1]
+        if intel['quality'] > quality:
+            quality = intel['quality']
             best = neighbour
     return best
 
@@ -49,23 +60,15 @@ def generate_neighbours_valid_intel(neighbours, searching_area):
 
 def neighbour_intel(binary_solution, searching_area):
     weight, quality = 0, 0
-    for bit_index in range(len(searching_area)):
+    for bit_index in range(len(searching_area.list)):
         weight += searching_area.list[bit_index].weight * int(binary_solution[bit_index])
         quality += searching_area.list[bit_index].value * int(binary_solution[bit_index])
         if weight > searching_area.max_weight:
             return None
-    return weight, quality
-
-
-def process_neighbours(neighbourhood, searching_area):
-    processed = [
-        Knapsack(
-            binary_solution=neighbour,
-            hypothesis_bag=searching_area,
-            max_weight=max_weight,
-        ) for neighbour in neighbourhood
-    ]
-    return processed
+    return {
+        'weight': weight,
+        'quality': quality,
+    }
 
 
 def flip_bit(bin_nr, bit_index):
@@ -82,12 +85,18 @@ if __name__ == '__main__':
     all_objects, max_weight = load_data_to_instance(file_path='/'.join((base_path, file_rel)))
     hypothesis_bag = HypothesisBag(all_objects, max_weight)
 
-    for run in range(given_runtimes):
+    while given_runtimes:
+        print('\nRun {}\n'.format(given_runtimes))
         bin_sol = generate_binary_solution(len(hypothesis_bag.list))
+        if neighbour_intel(binary_solution=bin_sol, searching_area=hypothesis_bag) is None:
+            continue
+        given_runtimes -= 1
         sol = sahc(
             current_hilltop=bin_sol,
             searching_area=hypothesis_bag,
         )
         solutions.append(sol)
     for sol in solutions:
-        print(sol)
+        print(neighbour_intel(sol, hypothesis_bag))
+    best_sol = find_best_neighbour(neighbours=solutions, searching_area=hypothesis_bag)
+    print(best_sol, neighbour_intel(best_sol, hypothesis_bag))
