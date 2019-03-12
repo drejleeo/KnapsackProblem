@@ -95,39 +95,3 @@ def is_valid(binary_solution, searching_area):
     if weight <= searching_area.max_weight:
         return True
     return False
-
-
-if __name__ == '__main__':
-    start_time = time.time()
-    iteration_limit, file_rel = int(sys.argv[1]), sys.argv[2]
-    solutions = []
-    all_objects, max_weight = load_data_to_instance(file_path='/'.join((base_path, file_rel)))
-    hypothesis_bag = HypothesisBag(all_objects, max_weight)
-
-
-
-
-
-    time2 = time.time()
-    iteration_count = 0
-    while iteration_count < iteration_limit:
-        bin_sol = generate_binary_solution(len(hypothesis_bag.list))
-        bin_sol = solution_to_valid(bin_sol, hypothesis_bag)
-        sol, iteration = sahc(
-            current_hilltop=bin_sol,
-            searching_area=hypothesis_bag,
-        )
-        iteration_count += iteration
-
-        solutions.append(sol)
-    print(get_quality(find_best_neighbour(neighbours=solutions, searching_area=hypothesis_bag), hypothesis_bag))
-
-    time3 = time.time()
-
-    # for sol in solutions:
-        # print(neighbour_intel(sol, hypothesis_bag))
-    best_sol = find_best_neighbour(neighbours=solutions, searching_area=hypothesis_bag)
-    print(best_sol, get_quality(best_sol, hypothesis_bag), get_weight(best_sol, hypothesis_bag))
-    print('\n')
-    print("--- %s seconds ---" % (time.time() - start_time))
-    print("--- {} seconds ---".format(time3 - time2))

@@ -30,7 +30,7 @@ def load_data_to_instance(file_path):
 
         weight_limit = int(file.readline())
 
-    return objects_list, weight_limit
+    return HypothesisBag(objects_list, weight_limit)
 
 
 def output_excel(nr_of_objects, default_sack, given_runtimes, solutions):
