@@ -10,6 +10,7 @@
 from utils import load_data_to_instance, base_path, generate_binary_solution
 from models import Object, HypothesisBag, Knapsack
 import sys
+import time
 
 
 def sahc(current_hilltop, searching_area):
@@ -23,26 +24,36 @@ def sahc(current_hilltop, searching_area):
     #     print('{} with intel: {}'.format(nei, neighbour_intel(nei, searching_area)))
     # print('\n')
     # print(best)
-
     best_quality = neighbour_intel(best, searching_area)['quality']
     # print('COMPARE best: {}      WITH     current: {}'.format(best_quality, current_quality))
     # print('\n\n')
 
-    if best and neighbour_intel(best, searching_area)['quality'] > current_quality:
+    if best and best_quality > current_quality:
         return sahc(best, searching_area)
     else:
         return current_hilltop
 
 
+def flip_bit(bin_nr, bit_index):
+    if bin_nr[bit_index] == '0':
+        bin_nr = '{}1{}'.format(bin_nr[:bit_index], bin_nr[bit_index+1:])
+    else:
+        return None
+    return bin_nr
+
+
 def get_neighbours(current_hilltop):
-    return [
-        flip_bit(current_hilltop, bit_index) for bit_index in range(len(bin_sol))
-    ]
+    neighbours = []
+    for bit_index in range(len(bin_sol)):
+        flipped = flip_bit(current_hilltop, bit_index)
+        if flipped:
+            neighbours.append(flipped)
+    return neighbours
 
 
 def find_best_neighbour(neighbours, searching_area):
     quality = 0
-    best = 0
+    best = '0' * len(searching_area.list)
     for full_intel in generate_neighbours_valid_intel(neighbours, searching_area):
         neighbour, intel = full_intel
         if intel['quality'] > quality:
@@ -71,22 +82,15 @@ def neighbour_intel(binary_solution, searching_area):
     }
 
 
-def flip_bit(bin_nr, bit_index):
-    if bin_nr[bit_index] == '0':
-        bin_nr = '{}1{}'.format(bin_nr[:bit_index], bin_nr[bit_index+1:])
-    elif bin_nr[bit_index] == '1':
-        bin_nr = '{}0{}'.format(bin_nr[:bit_index], bin_nr[bit_index+1:])
-    return bin_nr
-
-
 if __name__ == '__main__':
+    start_time = time.time()
     given_runtimes, file_rel = int(sys.argv[1]), sys.argv[2]
     solutions = []
     all_objects, max_weight = load_data_to_instance(file_path='/'.join((base_path, file_rel)))
     hypothesis_bag = HypothesisBag(all_objects, max_weight)
-
+    time2 = time.time()
     while given_runtimes:
-        print('\nRun {}\n'.format(given_runtimes))
+        # print('\nRun {}\n'.format(given_runtimes))
         bin_sol = generate_binary_solution(len(hypothesis_bag.list))
         if neighbour_intel(binary_solution=bin_sol, searching_area=hypothesis_bag) is None:
             continue
@@ -96,7 +100,12 @@ if __name__ == '__main__':
             searching_area=hypothesis_bag,
         )
         solutions.append(sol)
-    for sol in solutions:
-        print(neighbour_intel(sol, hypothesis_bag))
+    time3 = time.time()
+
+    # for sol in solutions:
+        # print(neighbour_intel(sol, hypothesis_bag))
     best_sol = find_best_neighbour(neighbours=solutions, searching_area=hypothesis_bag)
     print(best_sol, neighbour_intel(best_sol, hypothesis_bag))
+    print('\n')
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print("--- {} seconds ---".format(time3 - time2))
