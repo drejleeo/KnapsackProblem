@@ -1,11 +1,10 @@
-from models import Object, HypothesisBag
+from models import Object, Hypothesis
 import xlsxwriter
 import os
 from datetime import datetime
 from random import randint
 
 base_path = os.getcwd()
-
 
 def generate_binary_solution(nr_of_objects):
     superior_limit = 2 ** nr_of_objects
@@ -15,7 +14,7 @@ def generate_binary_solution(nr_of_objects):
     return binary_solution
 
 
-def load_data_to_instance(file_path):
+def get_hypothesis_from_file_input(file_path):
 
     with open(file_path, 'r') as file:
         total_number = int(file.readline())
@@ -30,7 +29,21 @@ def load_data_to_instance(file_path):
 
         weight_limit = int(file.readline())
 
-    return HypothesisBag(objects_list, weight_limit)
+    return Hypothesis(objects_list, weight_limit)
+
+
+def get_hypothesis_from_user_input():
+    length = int(input('Enter number of total objects: '))
+    weight_limit = int(input('Sack weight limit: '))
+    objs = []
+    for inp in range(length):
+        print('Object {}'.format(inp))
+        value = int(input('\tObject value: '))
+        weight = int(input('\tObject weight: '))
+        obj = Object(value=value, weight=weight)
+        objs.append(obj)
+    hypothesis = Hypothesis(objs, weight_limit)
+    return hypothesis
 
 
 def output_excel(nr_of_objects, default_sack, given_runtimes, solutions):

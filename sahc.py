@@ -7,15 +7,11 @@
     Altfel, se trece la pasul 2 cu noul c.
     5.Dupa un numar maxim de evaluari, se returneaza cel mai bun c(hilltop).
 '''
-from utils import load_data_to_instance, base_path, generate_binary_solution
-from models import HypothesisBag
-import sys
-import time
 
 
 def sahc(current_hilltop, searching_area, iteration=0):
     neighbours = get_neighbours(current_hilltop)
-    best = find_best_neighbour(neighbours, searching_area)
+    best = get_best_solution(neighbours, searching_area)
 
     current_quality = get_quality(current_hilltop, searching_area)
     best_quality = get_quality(best, searching_area)
@@ -52,18 +48,19 @@ def solution_to_valid(binary_solution, searching_area):
 
 def get_neighbours(current_hilltop):
     neighbours = []
-    for bit_index in range(len(bin_sol)):
+    for bit_index in range(len(current_hilltop)):
         flipped = flip_bit(current_hilltop, bit_index)
         if flipped:
             neighbours.append(flipped)
     return neighbours
 
 
-def find_best_neighbour(neighbours, searching_area):
+def get_best_solution(neighbours, searching_area):
     quality = 0
-    best = '0' * len(searching_area.list)
+    best = '0' * searching_area.total_objects
     for neighbour in generate_valid_neighbours(neighbours, searching_area):
         neigh_quality = get_quality(neighbour, searching_area)
+
         if neigh_quality > quality:
             quality = neigh_quality
             best = neighbour
@@ -78,14 +75,14 @@ def generate_valid_neighbours(neighbours, searching_area):
 
 def get_weight(binary_solution, searching_area):
     weight = 0
-    for bit_index in range(len(searching_area.list)):
+    for bit_index in range(searching_area.total_objects):
         weight += searching_area.list[bit_index].weight * int(binary_solution[bit_index])
     return weight
 
 
 def get_quality(binary_solution, searching_area):
     quality = 0
-    for bit_index in range(len(searching_area.list)):
+    for bit_index in range(searching_area.total_objects):
         quality += searching_area.list[bit_index].value * int(binary_solution[bit_index])
     return quality
 
@@ -95,3 +92,11 @@ def is_valid(binary_solution, searching_area):
     if weight <= searching_area.max_weight:
         return True
     return False
+
+
+def get_better_solution(solution1, solution2, searching_area):
+    quality1 = get_quality(solution1, searching_area)
+    quality2 = get_quality(solution2, searching_area)
+    if quality1 > quality2:
+        return solution1
+    return solution2
