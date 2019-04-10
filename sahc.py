@@ -7,6 +7,7 @@
     Altfel, se trece la pasul 2 cu noul c.
     5.Dupa un numar maxim de evaluari, se returneaza cel mai bun c(hilltop).
 '''
+from utils import get_quality, is_valid
 
 
 def sahc(current_hilltop, searching_area, iteration=0):
@@ -36,16 +37,6 @@ def flip_bit(base2, bit_index):
     return bin_nr
 
 
-def solution_to_valid(binary_solution, searching_area):
-    if is_valid(binary_solution, searching_area):
-        return binary_solution
-    for index in range(len(binary_solution)):
-        if binary_solution[index] == '1':
-            binary_solution = '{}0{}'.format(binary_solution[:index], binary_solution[index + 1:])
-            if is_valid(binary_solution, searching_area):
-                return binary_solution
-
-
 def get_neighbours(current_hilltop):
     neighbours = []
     for bit_index in range(len(current_hilltop)):
@@ -71,27 +62,6 @@ def generate_valid_neighbours(neighbours, searching_area):
     for neighbour in neighbours:
         if is_valid(neighbour, searching_area):
             yield neighbour
-
-
-def get_weight(binary_solution, searching_area):
-    weight = 0
-    for bit_index in range(searching_area.total_objects):
-        weight += searching_area.list[bit_index].weight * int(binary_solution[bit_index])
-    return weight
-
-
-def get_quality(binary_solution, searching_area):
-    quality = 0
-    for bit_index in range(searching_area.total_objects):
-        quality += searching_area.list[bit_index].value * int(binary_solution[bit_index])
-    return quality
-
-
-def is_valid(binary_solution, searching_area):
-    weight = get_weight(binary_solution, searching_area)
-    if weight <= searching_area.max_weight:
-        return True
-    return False
 
 
 def get_better_solution(solution1, solution2, searching_area):

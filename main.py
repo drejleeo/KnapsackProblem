@@ -1,8 +1,11 @@
+from genetic_algorithm.genetic import genetik
 from utils import get_hypothesis_from_file_input, base_path, generate_binary_solution, \
-    get_hypothesis_from_user_input
-from sahc import sahc, solution_to_valid, get_best_solution, get_quality, \
-    get_weight
+    get_hypothesis_from_user_input, solution_to_valid, get_weight, get_quality, \
+    output_excel, random_search
+from sahc import sahc
 import time
+import datetime
+import xlsxwriter
 
 
 class App(object):
@@ -25,6 +28,8 @@ class App(object):
         print('0. Program input')
         print('1. File input')
         print('2. SAHC')
+        print('3. Random search')
+        print('4. Genetic algorithm')
         print('Ctrl+C to terminate\n')
 
     def option_user_input(self):
@@ -50,10 +55,14 @@ class App(object):
         total_found_solutions = 0
 
         iteration_count = 0
+
+        current_date = datetime.datetime.now()
+        current_date = current_date.strftime("%Y-%m-%d_%H-%M-%f")
+
         start_time = time.time()
         while iteration_count < iteration_limit:
 
-            bin_sol = generate_binary_solution(len(self._hypothesis.list))
+            bin_sol = generate_binary_solution(self._hypothesis.total_objects)
             bin_sol = solution_to_valid(bin_sol, self._hypothesis)
             sol, iteration = sahc(
                 current_hilltop=bin_sol,
@@ -67,32 +76,41 @@ class App(object):
                 best = sol
 
             quality_sum += get_quality(sol, self._hypothesis)
-
         print("--- {} seconds ---".format(time.time() - start_time))
-
+        print("Total found solutions: {}".format(total_found_solutions))
         avg = quality_sum / total_found_solutions
+
         print('Average: {}, Best quality: {}, solution: {}'.format(avg, get_quality(best, self._hypothesis), 'best'))
         for sol in solutions:
             print('Quality: {}, Weight: {}'.format(
                 get_quality(sol, self._hypothesis), get_weight(sol, self._hypothesis))
             )
 
-        # tasks = [
-        #     'algoritmul',
-        #     'params',
-        #     'nr runs',
-        # ]
-
     def option_start_rand(self):
-        given_runtimes = int(input('Enter'))
-        solutions = run(
-            nr_of_objects=self._hypothesis.total_objects,
-            default_sack=self.hypothesi,
-            weight_limit=limit,
+        given_runtimes = int(input('Choose the number of solutions wanted: '))
+        solutions = random_search(
             given_runtimes=given_runtimes,
+            searching_area=self._hypothesis
         )
-        output_excel(nr_of_objects=total_objects, default_sack=default_sack, given_runtimes=given_runtimes,
-                     solutions=solutions)
+        output_excel(
+            solutions=solutions,
+            given_runtimes=given_runtimes,
+            searched_area=self._hypothesis
+        )
+
+    def option_genetic_al(self):
+        ps = int(input("Population size: "))
+        ng = int(input("Number of generations: "))
+        cp = int(input("Crossover probability: "))
+        mp = int(input("Mutation probability: "))
+
+        prototype = genetik(
+            population_size=ps,
+            number_of_generations=ng,
+            crossover_probability=cp,
+            mutation_probability=mp,
+        )
+        print(prototype)
 
     def run(self):
 
@@ -100,6 +118,8 @@ class App(object):
             0: self.option_user_input,
             1: self.option_file_input,
             2: self.option_start_sahc,
+            3: self.option_start_rand,
+            4: self.option_genetic_al,
         }
 
         while True:
@@ -114,10 +134,9 @@ class App(object):
                 print('Option not in range.')
                 continue
 
-            if option == 0 or option == 1:
+            if option == 0 or option == 1 or self._load_token:
                 map_options[option]()
-            elif self._load_token:
-                map_options[option]()
+            else: print('Option not available. Make sure you entered data or option exists')
 
 
 if __name__ == '__main__':
